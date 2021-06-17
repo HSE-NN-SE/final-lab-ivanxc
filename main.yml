@@ -1,0 +1,74 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  codeStyle:
+    # The type of runner that the job will run on
+    runs-on: self-hosted
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      - name: install dependences
+        run: |
+          pip install flake8
+      - name: codestyle
+        run: python -m flake8 ./ --ignore=F401,E402
+  tests:
+    runs-on: self-hosted
+    needs: codeStyle
+    steps:
+      - uses: actions/checkout@v2
+      - name: install dependences
+        run: |
+          pip install -e '.[test]'
+          coverage run -m pytest
+          coverage report
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # Runs a single command using the runners shell
+      - name: Run a one-line script
+        run: echo Successfully!
+  dockerhub:
+    runs-on: self-hosted
+    needs: tests
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      - name: Docker build
+        run: sudo docker build . --tag test
+      - name: Change tag
+        run: sudo docker image tag test 28122001/test:$GITHUB_RUN_ID
+      - name: Push docker
+        run: sudo docker push push ivanxc/final:$GITHUB_RUN_ID
+      - name: Docker run
+        run: |
+          sudo docker ps
+          sudo docker rm -f test
+          sudo docker run -d -p 8080:5000 --name test ivanxc/final:$GITHUB_RUN_ID
