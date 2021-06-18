@@ -63,7 +63,7 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       - name: Docker build
-        run: sudo docker build . --tag test
+        run: sudo docker build . --tag final
       - name: Change tag
         run: sudo docker image tag test ivanxc/test:$GITHUB_RUN_ID
       - name: Push docker
@@ -72,4 +72,4 @@ jobs:
         run: |
           sudo docker ps
           sudo docker rm -f test
-          sudo docker run -d -p 8080:5000 --name test ivanxc/final:$GITHUB_RUN_ID
+          sudo docker run -d -p 8080:5000 --name final ivanxc/final:$GITHUB_RUN_ID
