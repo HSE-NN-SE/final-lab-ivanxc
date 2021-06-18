@@ -67,7 +67,7 @@ jobs:
       - name: Change tag
         run: sudo docker image tag test 28122001/test:$GITHUB_RUN_ID
       - name: Push docker
-        run: sudo docker push push ivanxc/final:$GITHUB_RUN_ID
+        run: sudo docker push push ivanxc/final
       - name: Docker run
         run: |
           sudo docker ps
