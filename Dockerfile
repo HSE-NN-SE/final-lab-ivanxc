@@ -1,13 +1,9 @@
-FROM ubuntu
-RUN apt update && apt upgrade
-RUN apt-get install -y python
-RUN apt install -y python3-pip
-COPY javascript-ajax-example .
-RUN pip install flask
-RUN apt-get install -y python3-venv
-RUN python3 -m venv venv
-RUN . venv/bin/activate
-RUN pip install -e .
-ENV FLASK_APP=js_example
+FROM python:3.8-slim-buster
 EXPOSE 5000
-CMD python3 -m flask run --host-0.0.0.0
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+COPY . /app
+WORKDIR /app
+ENV FLASK_APP=js_example
+RUN pip install -r requirements.txt
+CMD python -m flask run -h 0.0.0.0
